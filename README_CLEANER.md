@@ -9,14 +9,14 @@ Dieses Skript automatisiert die Vorbereitung von DXF-Zeichnungen für CNC-Maschi
 2.  **Deduplizierung**: Entfernt doppelte Linien.
 3.  **Topologie-Korrektur**:
     - Findet zusammenhängende Konturen.
-    - Schließt Lücken in Konturen automatisch, wenn sie kleiner als 1.0mm sind.
+    - Schließt Lücken in Konturen automatisch, wenn sie kleiner als die Toleranz (Default: 1.0mm) sind.
     - Konvertiert Kreise und Bögen in optimierte Polylinien.
 4.  **Feedback**:
     - Setzt visuelle Marker (kleine magentafarbene Kreise) an Stellen, wo Lücken automatisch geschlossen wurden.
     - Gibt einen Bericht auf der Konsole aus.
 5.  **Output**:
     - Erzeugt eine saubere DXF-Datei (R2010).
-    - Alle Schneidkonturen liegen auf dem Layer `SCHNITT_CONTUR`.
+    - Alle Schneidkonturen liegen auf dem Layer `SCHNITT_CONTUR` (konfigurierbar).
 
 ## Installation
 
@@ -29,16 +29,23 @@ pip install ezdxf
 ## Nutzung
 
 ```bash
+# Standardnutzung (sucht dirty_input.dxf -> clean_output.dxf)
 python dxf_cleaner.py
+
+# Eigene Dateien angeben
+python dxf_cleaner.py kunde_zeichnung.dxf maschine_ready.dxf
+
+# Mit angepasster Toleranz (z.B. nur Lücken < 0.5mm schließen)
+python dxf_cleaner.py kunde.dxf fertig.dxf --gap 0.5
+
+# Mit anderem Ziel-Layer
+python dxf_cleaner.py kunde.dxf fertig.dxf --layer CUT_LAYER_1
 ```
 
-Das Skript sucht aktuell nach `dirty_input.dxf` und schreibt `clean_output.dxf`.
-(Im Produktivbetrieb würde man Argumente übergeben).
+## Hilfe
 
-## Anpassung
+Für eine Übersicht aller Optionen:
 
-Im Skript `dxf_cleaner.py` können folgende Parameter angepasst werden:
-
-- `gap_tol`: Maximale Lückengröße, die geschlossen wird (Default: 1.0mm).
-- `target_layer`: Layername für die Konturen.
-- `marker_layer`: Layername für die Warn-Marker.
+```bash
+python dxf_cleaner.py --help
+```

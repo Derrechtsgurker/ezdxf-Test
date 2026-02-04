@@ -4,6 +4,8 @@ from ezdxf import edgeminer as em
 from ezdxf import edgesmith as es
 from typing import List, Tuple
 import sys
+import argparse
+import os
 
 def cleanup_dxf(input_file: str, output_file: str,
                 gap_tol: float = 1.0,
@@ -11,6 +13,10 @@ def cleanup_dxf(input_file: str, output_file: str,
                 marker_layer: str = "MARKER_WARNING"):
 
     print(f"--- Starte Reinigung von {input_file} ---")
+
+    if not os.path.exists(input_file):
+        print(f"Fehler: Datei '{input_file}' nicht gefunden.")
+        sys.exit(1)
 
     try:
         doc = ezdxf.readfile(input_file)
@@ -198,10 +204,18 @@ def cleanup_dxf(input_file: str, output_file: str,
     print(f"--- Fertig. Datei gespeichert als: {output_file} ---")
     print(f"Statistik:")
     print(f"  - Geschlossene Loops: {len(loops)}")
+    print(f"  - Gefundene Kreise: {len(circles)}")
     print(f"  - Offene Ketten verarbeitet: {len(open_chains)}")
     print(f"  - Davon nachträglich geschlossen: {closed_gaps_count}")
 
 
 if __name__ == "__main__":
-    # Testlauf mit default Parametern
-    cleanup_dxf("dirty_input.dxf", "clean_output.dxf", gap_tol=1.0)
+    parser = argparse.ArgumentParser(description="DXF Cleaner für Laserschneiden")
+    parser.add_argument("input", nargs='?', default="dirty_input.dxf", help="Eingabe DXF Datei")
+    parser.add_argument("output", nargs='?', default="clean_output.dxf", help="Ausgabe DXF Datei")
+    parser.add_argument("--gap", type=float, default=1.0, help="Maximale Lückengröße die geschlossen wird (Default: 1.0mm)")
+    parser.add_argument("--layer", type=str, default="SCHNITT_CONTUR", help="Ziel-Layer für Konturen")
+
+    args = parser.parse_args()
+
+    cleanup_dxf(args.input, args.output, gap_tol=args.gap, target_layer=args.layer)
